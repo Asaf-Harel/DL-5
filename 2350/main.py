@@ -15,10 +15,10 @@ def find_f(x):
 
 def train_min(alpha, epochs, func):
     """ Find the x of the min point
-    :param alpha - change rate
-    :param epochs - number of iterations
-    :param func - function
-    :return x of the min point, function and derivative
+    :param alpha: change rate
+    :param epochs: number of iterations
+    :param func: function
+    :return: x of the min point, function and derivative
     """
 
     x_min = 0
@@ -38,9 +38,12 @@ def train_min(alpha, epochs, func):
 
 def train_max(alpha, epochs, func):
     """ Find the x of the max point
-    :param alpha - change rate
-    :param epochs - number of iterations
-    :param func - function
+    :param alpha: change rate
+    :type alpha: float
+    :param epochs: number of iterations
+    :type epochs: float
+    :param func: function
+    :type func: <class 'function'>
     :return x of the max point, function and derivative
     """
     x_max = 0
