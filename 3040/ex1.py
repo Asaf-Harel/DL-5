@@ -1,7 +1,5 @@
 import numpy as np
 import time
-import matplotlib.pyplot as plt
-import unit10.b_utils as u10
 
 
 def main():
