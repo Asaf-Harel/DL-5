@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Vector(object):
     def __init__(self, size, is_col=True, fill=0, init_values=None):
         self.v = []

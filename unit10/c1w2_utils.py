@@ -7,11 +7,11 @@ def main():
         main()
 
 def load_datasetC1W2():
-    return load_dataset(r'\unit10\datasets\cat_nocat')
+    return load_dataset(r'/unit10/datasets/cat_nocat')
 
 def load_dataset(path):
     f = os.getcwd() + path
-    train_dataset = h5py.File(f+r'\train_catvnoncat.h5', "r")
+    train_dataset = h5py.File(f+r'/train_catvnoncat.h5', "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
 
