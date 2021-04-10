@@ -70,8 +70,9 @@ def check_cat(path):
     plt.show()
     my_image = np.array(img).reshape(1, -1).T
     my_predicted_image = predict(my_image, W, b)
-    print("y = " + str(np.squeeze(my_predicted_image)) + ", your algorithm predicts a \"" + classes[
-        int(np.squeeze(my_predicted_image)),].decode("utf-8") + "\" picture.")
+    print(
+        f'y = {str(np.squeeze(my_predicted_image))}, your algorithm predicts a "{classes[int(np.squeeze(my_predicted_image))].decode("utf-8")}" picture.'
+    )
 
 
 train_X, train_set_y, test_X, test_set_y, classes = u10.load_datasetC1W2()
