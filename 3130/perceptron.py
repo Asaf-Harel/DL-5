@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class NeuralNetwork:
+class Perceptron:
     def __init__(self):
         self.W = None
         self.b = None

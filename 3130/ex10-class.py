@@ -2,7 +2,7 @@ import numpy as np
 import unit10.c1w2_utils as u10
 from PIL import Image
 import matplotlib.pyplot as plt
-from neural_network import NeuralNetwork
+from perceptron import Perceptron
 
 
 def check_cat(path, indentifier):
@@ -29,13 +29,13 @@ test_X_flatten = test_X.reshape(test_set_y.shape[0], -1).T
 train_set_x = train_X_flatten / 255.0
 test_set_x = test_X_flatten / 255.0
 
-cat_identifier = NeuralNetwork()
+cat_identifier = Perceptron()
 
 cat_identifier.train(train_set_x, train_set_y, num_iterations=4000, learning_rate=0.005)
 
 Y_prediction_test = cat_identifier.predict(test_set_x)
 Y_prediction_train = cat_identifier.predict(train_set_x)
 
-check_cat("./cat.jpg", cat_identifier)
+check_cat(r"./cat.jpg", cat_identifier)
 check_cat("./cat2.jpg", cat_identifier)
 check_cat("./cat3.jpg", cat_identifier)
