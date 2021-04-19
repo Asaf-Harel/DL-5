@@ -24,9 +24,9 @@ l[4].init_weights("random")
 
 # -------------------- Exercise 1.2 --------------------
 # Z = np.array([[1, -2, 3, -4], [-10, 20, 30, -40]])
-#
-# l[2].leaky_relu_d = 0.1
-#
+
+l[2].leaky_relu_d = 0.1
+
 # for i in range(1, len(l)):
 #     print(l[i].activation_forward(Z))
 
@@ -40,7 +40,6 @@ Al = X
 # for i in range(1, len(l)):
 #     Al = l[i].forward_propagation(Al, True)
 #     print('layer', i, " A", str(Al.shape), ":\n", Al)
-
 
 # -------------------- Exercise 1.4 --------------------
 Al = X
