@@ -2,19 +2,21 @@ import numpy as np
 
 
 class Perceptron:
-    def __init__(self):
-        self.W = None
-        self.b = None
+    def __init__(self, X, Y, num_iterations=4000, learning_rate=0.01):
+        self._X = X
+        self._Y = Y
+        self._num_iter = num_iterations
+        self._learning_rate = learning_rate
 
-    def initialize_with_zeros(self, dim):
+    def _initialize_with_zeros(self, dim):
         W = np.zeros(dim)
         b = 0
         return W, b
 
-    def sigmoid(self, z):
+    def _sigmoid(self, z):
         return 1 / (1 + np.exp(-z))
 
-    def forward_propagation(self, X, Y, w, b):
+    def _forward_propagation(self, X, Y, w, b):
         """
         :param X: matrix of inputs (n, m)
         :param Y: classification vector (m)
@@ -23,12 +25,12 @@ class Perceptron:
         :return: Logistic regression results vector, and the value of the cost function
         """
         m = X.shape[1]
-        A = self.sigmoid(np.dot(w.T, X) + b)
+        A = self._sigmoid(np.dot(w.T, X) + b)
         cost = (-1 / m) * np.sum((Y * np.log(A)) + (1 - Y) * np.log(1 - A))
 
         return A, cost
 
-    def backward_propagation(self, X, Y, A):
+    def _backward_propagation(self, X, Y, A):
         """
         :param X: matrix of inputs (n, m)
         :param Y: classification vector (m)
@@ -42,19 +44,19 @@ class Perceptron:
 
         return dw, db
 
-    def train(self, X, Y, num_iterations, learning_rate):
-        n = X.shape[0]
-        W, b = self.initialize_with_zeros(n)
+    def train(self):
+        n = self._X.shape[0]
+        W, b = self._initialize_with_zeros(n)
 
-        for i in range(num_iterations):
-            A, cost = self.forward_propagation(X, Y, W, b)
-            dw, db = self.backward_propagation(X, Y, A)
-            W -= learning_rate * dw
-            b -= learning_rate * db
+        for i in range(self._num_iter):
+            A, cost = self._forward_propagation(self._X, self._Y, W, b)
+            dw, db = self._backward_propagation(self._X, self._Y, A)
+            W -= self._learning_rate * dw
+            b -= self._learning_rate * db
 
-        self.W = W
-        self.b = b
+        self._W = W
+        self._b = b
 
     def predict(self, X):
-        A = self.sigmoid(np.dot(self.W.T, X) + self.b)
+        A = self._sigmoid(np.dot(self._W.T, X) + self._b)
         return np.where(A > 0.5, 1, 0)

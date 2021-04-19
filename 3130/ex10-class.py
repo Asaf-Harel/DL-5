@@ -29,9 +29,9 @@ test_X_flatten = test_X.reshape(test_set_y.shape[0], -1).T
 train_set_x = train_X_flatten / 255.0
 test_set_x = test_X_flatten / 255.0
 
-cat_identifier = Perceptron()
+cat_identifier = Perceptron(train_set_x, train_set_y, num_iterations=4000, learning_rate=0.005)
 
-cat_identifier.train(train_set_x, train_set_y, num_iterations=4000, learning_rate=0.005)
+cat_identifier.train()
 
 Y_prediction_test = cat_identifier.predict(test_set_x)
 Y_prediction_train = cat_identifier.predict(train_set_x)
