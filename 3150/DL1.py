@@ -47,7 +47,7 @@ class DLLayer:
             self._adaptive_alpha_b = np.full((self._num_units, 1), self.alpha)
             self._adaptive_alpha_W = np.full((self._num_units, *self._input_shape), self.alpha)
             self.adaptive_cont = 1.1
-            self.adaptive_switch = 0.5
+            self.adaptive_switch = -0.5
 
         self.init_weights(W_initialization)
 
@@ -111,6 +111,14 @@ class DLLayer:
         self._Z = np.dot(self.W, self._A_prev) + self.b
 
         return self.activation_forward(self._Z)
+
+    def backward_propagation(self, dA):
+        m = dA.shape[0]
+        dZ = self.activation_backward(dA)
+        dA_Prev = np.dot(self.W.T, dZ)
+        self.db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
+        self.dW = (1 / m) * np.dot(dZ, self._A_prev.T)
+        return dA_Prev
 
     def __str__(self):
         s = self.name + " Layer:\n"

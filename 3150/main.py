@@ -37,8 +37,8 @@ m = 3
 X = np.random.randn(4000, m)
 Al = X
 
-# for i in range(1, len(l)):
-#     Al = l[i].forward_propagation(Al, True)
+for i in range(1, len(l)):
+    Al = l[i].forward_propagation(Al, True)
 #     print('layer', i, " A", str(Al.shape), ":\n", Al)
 
 # -------------------- Exercise 1.4 --------------------
@@ -46,4 +46,22 @@ Al = X
 for i in range(1, len(l)):
     Al = l[i].forward_propagation(Al, True)
     dZ = l[i].activation_backward(Al)
-    print('layer', i, " dZ", str(dZ.shape), ":\n", dZ)
+    # print('layer', i, " dZ", str(dZ.shape), ":\n", dZ)
+
+# -------------------- Exercise 1.5 --------------------
+Al = X
+
+for i in range(1, len(l)):
+    Al = l[i].forward_propagation(Al, False)
+
+np.random.seed(3)
+fig, axes = plt.subplots(1, 4, figsize=(12, 16))
+fig.subplots_adjust(hspace=0.5, wspace=0.5)
+dAl = np.random.randn(Al.shape[0], m) * np.random.random_integers(-100, 100, Al.shape)
+
+for i in reversed(range(1, len(l))):
+    axes[i - 1].hist(dAl.reshape(-1), align='left')
+    axes[i - 1].set_title('dAl[' + str(i) + ']')
+    dAl = l[i].backward_propagation(dAl)
+
+plt.show()
