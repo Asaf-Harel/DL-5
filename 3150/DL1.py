@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 
 class DLLayer:
@@ -55,7 +54,7 @@ class DLLayer:
         self.b = np.zeros((self._num_units, 1), dtype=float)
 
         if W_initialization == "zeros":
-            self.W = np.zeros((self._num_units, 1), dtype=float)
+            self.W = np.zeros((self._num_units, *self._input_shape), dtype=float)
         elif W_initialization == "random":
             self.W = np.random.randn(self._num_units, *self._input_shape) * self.random_scale
 
@@ -109,16 +108,26 @@ class DLLayer:
     def forward_propagation(self, A_prev, is_predict):
         self._A_prev = np.array(A_prev, copy=True)
         self._Z = np.dot(self.W, self._A_prev) + self.b
+        A = self.activation_forward(self._Z)
 
-        return self.activation_forward(self._Z)
+        return A
 
     def backward_propagation(self, dA):
-        m = dA.shape[0]
         dZ = self.activation_backward(dA)
+        m = self._A_prev.shape[1]
+        self.dW = (1.0 / m) * np.dot(dZ, self._A_prev.T)
+        self.db = (1.0 / m) * np.sum(dZ, axis=1, keepdims=True)
         dA_Prev = np.dot(self.W.T, dZ)
-        self.db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
-        self.dW = (1 / m) * np.dot(dZ, self._A_prev.T)
+
         return dA_Prev
+
+    def update_parameters(self):
+        if self._optimization is None:
+            self.W = self.dW * self.alpha
+            self.b = self.db * self.alpha
+        elif self._optimization == "adaptive":
+            self._adaptive_alpha_W *= np.where(self._adaptive_alpha_W * self.dW > 0, self.adaptive_cont, self.adaptive_switch)
+            self._adaptive_alpha_b *= np.where(self._adaptive_alpha_b * self.db > 0, self.adaptive_cont, self.adaptive_switch)
 
     def __str__(self):
         s = self.name + " Layer:\n"
