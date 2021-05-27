@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import os
+import h5py
+
 
 class DLLayer:
     def __init__(self, name, num_units, input_shape, activation="relu", W_initialization="random", learning_rate=1.2,
@@ -59,6 +62,19 @@ class DLLayer:
             self.W = np.full((self._num_units, *self._input_shape), self.alpha)
         elif W_initialization == "random":
             self.W = np.random.randn(*(self._num_units, *self._input_shape)) * self.random_scale
+        elif W_initialization == "Xavier":
+            prev_l = self._input_shape[0]
+            self.W = np.random.randn(self._num_units, prev_l) * np.sqrt(1 / prev_l)
+        elif W_initialization == "He":
+            prev_l = self._input_shape[0]
+            self.W = np.random.randn(self._num_units, prev_l) * np.sqrt(2 / prev_l)
+        else:
+            try:
+                with h5py.File(W_initialization, 'r') as hf:
+                    self.W = hf['W'][:]
+                    self.b = hf['b'][:]
+            except FileNotFoundError:
+                raise NotImplementedError("Unrecognized initialization:", W_initialization)
 
     def _sigmoid(self, Z):
         return 1 / (1 + np.exp(-Z))
@@ -145,6 +161,14 @@ class DLLayer:
             self.W -= self._adaptive_alpha_W
             self.b -= self._adaptive_alpha_b
 
+    def save_weights(self, path, file_name):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        with h5py.File(f"{path}/{file_name}.h5", 'w') as hf:
+            hf.create_dataset('W', data=self.W)
+            hf.create_dataset('b', data=self.b)
+
     def __str__(self):
         s = self.name + " Layer:\n"
         s += "\tnum_units: " + str(self._num_units) + "\n"
@@ -198,12 +222,12 @@ class DLModel:
 
     def compile(self, loss, threshold=0.5):
         self.threshold = threshold
-        self.loss = loss
+        self.loss = loss.lower()
 
-        if loss == "squared_means":
+        if "squared" in loss and "means":
             self.loss_forward = self._squared_means
             self.loss_backward = self._squared_means_backward
-        elif loss == "cross_entropy":
+        elif "cross" in loss and "entropy" in loss:
             self.loss_forward = self._cross_entropy
             self.loss_backward = self._cross_entropy_backward
 
@@ -248,6 +272,13 @@ class DLModel:
         for i in range(1, L):
             Al = self.layers[i].forward_propagation(Al, True)
         return Al > self.threshold
+
+    def save_weights(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        for i in range(1, len(self.layers)):
+            self.layers[i].save_weights(path, f"Layer{i}")
 
     def __str__(self):
         s = self.name + " description:\n\tnum_layers: " + str(len(self.layers) - 1) + "\n"
