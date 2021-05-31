@@ -16,7 +16,8 @@ class DLLayer:
         self._learning_rate = learning_rate
         self._optimization = optimization
         self.alpha = learning_rate
-        self.random_scale = 0.01
+        self.random_scale = 0.1
+        self.init_weights(W_initialization)
 
         # Optimization parameters
         if self._optimization == "adaptive":
@@ -53,19 +54,17 @@ class DLLayer:
             self.activation_forward = self._leaky_relu
             self.activation_backward = self._leaky_relu_backward
 
-        self.init_weights(W_initialization)
-
     def init_weights(self, W_initialization):
         self.b = np.zeros((self._num_units, 1), dtype=float)
 
-        if W_initialization == "zeros":
+        if W_initialization.lower() == "zeros":
             self.W = np.full((self._num_units, *self._input_shape), self.alpha)
-        elif W_initialization == "random":
+        elif W_initialization.lower() == "random":
             self.W = np.random.randn(*(self._num_units, *self._input_shape)) * self.random_scale
-        elif W_initialization == "Xavier":
+        elif W_initialization.lower() == "xavier":
             prev_l = self._input_shape[0]
             self.W = np.random.randn(self._num_units, prev_l) * np.sqrt(1 / prev_l)
-        elif W_initialization == "He":
+        elif W_initialization.lower() == "he":
             prev_l = self._input_shape[0]
             self.W = np.random.randn(self._num_units, prev_l) * np.sqrt(2 / prev_l)
         else:
