@@ -1,12 +1,10 @@
 from DL3 import *
 from sklearn.datasets import fetch_openml
-from sklearn.metrics import classification_report, confusion_matrix
-import pandas as pd
+from sklearn.metrics import confusion_matrix
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
-from unit10 import c1w5_utils as u10
 
 
 def start(n):
@@ -63,44 +61,69 @@ end()
 
 # -------------------- Exercise 2.4 --------------------
 np.random.seed(1)
-hidden_layer = DLLayer("Softmax 1", 64, (784,), "sigmoid",
-                       r"C:\Users\User\Documents\School\DL-5\3190\weights\Layer1.h5", 1)
-softmax_layer = DLLayer("Softmax 1", 10, (64,), "softmax",
-                        r"C:\Users\User\Documents\School\DL-5\3190\weights\Layer2.h5", 1)
+hidden_layer = DLLayer("Softmax 1", 64, (784,), "sigmoid", "He", 1)
+softmax_layer = DLLayer("Softmax 1", 10, (64,), "softmax", "He", 1)
 model = DLModel()
 model.add(hidden_layer)
 model.add(softmax_layer)
 model.compile("categorical_cross_entropy")
 costs = model.train(X_train, Y_train, 2000)
 
-
 plt.plot(np.squeeze(costs))
 plt.ylabel('cost')
 plt.xlabel('iterations')
 plt.title("Learning rate =" + str(1))
 plt.show()
+model.save_weights('./weights')
+
 
 # -------------------- Exercise 2.5 --------------------
-# start(2.5)
+start(2.5)
 
 
-# def L_model_forward_softmax(X, parameters, activation):
-#     pass
+def predict_softmax(X, Y, model):
+    AL = model.predict(X)
+    predictions = np.argmax(AL, axis=0)
+    labels = np.argmax(Y, axis=0)
+    return confusion_matrix(predictions, labels)
 
 
-# def predict_softmax(X, Y, parameters, activation):
-#     AL, caches = L_model_forward_softmax(X, parameters, activation)
-#     predictions = np.argmax(AL, axis=0)
-#     labels = np.argmax(Y, axis=0)
-#     return confusion_matrix(predictions, labels)
-#
-#
-# print('Deep train accuracy')
-# pred_train = predict_softmax(X_train, Y_train, parameters, u10.sigmoid)
-# print(pred_train)
-# print('Deep test accuracy')
-# pred_test = predict_softmax(X_test, Y_test, parameters, u10.sigmoid)
-# print(pred_test)
-# i = 4
-# print('train', str(i), str(pred_train[i][i] / np.sum(pred_train[:, i])))
-# print('test', str(i), str(pred_test[i][i] / np.sum(pred_test[:, i])))
+print('Deep train accuracy')
+pred_train = predict_softmax(X_train, Y_train, model)
+print(pred_train)
+print('Deep test accuracy')
+
+pred_test = predict_softmax(X_test, Y_test, model)
+print(pred_test)
+
+i = 4
+print('train', str(i), str(pred_train[i][i] / np.sum(pred_train[:, i])))
+print('test', str(i), str(pred_test[i][i] / np.sum(pred_test[:, i])))
+end()
+
+# -------------------- Exercise 2.6 --------------------
+start(2.6)
+num_px = 28
+img_path = 'images/2.jpg'  # full path of the rgb image
+my_label_y = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]  # change the 1’s position to fit image
+
+image = Image.open(img_path)
+image28 = image.resize((num_px, num_px), Image.ANTIALIAS)  # resize to 28X28
+plt.imshow(image)
+
+# Before scale
+plt.show()
+plt.imshow(image28)  # After scale
+plt.show()
+
+gray_image = ImageOps.grayscale(image28)
+
+# grayscale – to fit to training data
+my_image = np.reshape(gray_image, (num_px * num_px, 1))
+my_label_y = np.reshape(my_label_y, (10, 1))
+my_image = my_image / 255.0 - 0.5
+
+# normalize
+p = predict_softmax(my_image, my_label_y, model)
+print(p)
+end()
