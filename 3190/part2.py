@@ -104,7 +104,7 @@ end()
 # -------------------- Exercise 2.6 --------------------
 start(2.6)
 num_px = 28
-img_path = 'images/2.jpg'  # full path of the rgb image
+img_path = 'images/3.jpg'  # full path of the rgb image
 my_label_y = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]  # change the 1’s position to fit image
 
 image = Image.open(img_path)
@@ -125,5 +125,6 @@ my_image = my_image / 255.0 - 0.5
 
 # normalize
 p = predict_softmax(my_image, my_label_y, model)
+p = p.reshape(-1)
 print(p)
 end()
