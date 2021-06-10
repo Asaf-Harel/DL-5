@@ -74,8 +74,6 @@ plt.ylabel('cost')
 plt.xlabel('iterations')
 plt.title("Learning rate =" + str(1))
 plt.show()
-model.save_weights('./weights')
-
 
 # -------------------- Exercise 2.5 --------------------
 start(2.5)
@@ -125,6 +123,5 @@ my_image = my_image / 255.0 - 0.5
 
 # normalize
 p = predict_softmax(my_image, my_label_y, model)
-p = p.reshape(-1)
 print(p)
 end()
