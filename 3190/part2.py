@@ -107,14 +107,13 @@ def predict(X, Y, model):
     AL = model.predict(X)
     predictions = np.argmax(AL, axis=0)
     labels = np.argmax(Y, axis=0)
-    one_hot = np.zeros((10,))
-    one_hot[predictions] = 1
-    return one_hot
+
+    return predictions, labels
 
 
 num_px = 28
-img_path = 'images/5_1.jpg'  # full path of the rgb image
-my_label_y = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]  # change the 1’s position to fit image
+img_path = 'images/3.jpeg'  # full path of the rgb image
+my_label_y = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]  # change the 1’s position to fit image
 
 image = Image.open(img_path)
 image28 = image.resize((num_px, num_px), Image.ANTIALIAS)  # resize to 28X28
@@ -133,6 +132,6 @@ my_label_y = np.reshape(my_label_y, (10, 1))
 my_image = my_image / 255.0 - 0.5
 
 # normalize
-p = predict(my_image, my_label_y, model)
-print(p)
+p, l = predict(my_image, my_label_y, model)
+print('real:', l, 'prediction:', p)
 end()

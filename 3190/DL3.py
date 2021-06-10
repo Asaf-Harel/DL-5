@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import h5py
+from sklearn.metrics import confusion_matrix
 
 
 class DLLayer:
@@ -308,6 +309,13 @@ class DLModel:
         if Al.shape[0] > 1:
             return np.where(Al == Al.max(axis=0), 1, 0)
         return Al > self.threshold
+
+    def confusion_matrix(self, X, Y):
+        AL = self.predict(X)
+        predictions = np.argmax(AL, axis=0)
+        labels = np.argmax(Y, axis=0)
+
+        return confusion_matrix(predictions, labels)
 
     def save_weights(self, path):
         if not os.path.exists(path):
