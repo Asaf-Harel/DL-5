@@ -1,8 +1,5 @@
 from DL3 import *
-from sklearn.datasets import fetch_openml
-from sklearn.metrics import confusion_matrix
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
 
