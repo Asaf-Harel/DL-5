@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import time
 
 red1, green1 = 0, 0
-raccoon = Image.open(r'../unit10/Raccoon.png')
+raccoon = Image.open(r'../../unit10/Raccoon.png')
 
 plt.imshow(raccoon)
 plt.show()

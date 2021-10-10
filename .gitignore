@@ -3,3 +3,4 @@ venv/
 **/fer2013.csv
 "3110 פרספטרון.pptx"
 .idea/
+**/__pycache__/
