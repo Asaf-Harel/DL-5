@@ -363,32 +363,68 @@ class DLModel:
         for i in range(1, len(self.layers)):
             self.layers[i].set_train(is_train)
 
-    def train(self, X, Y, num_iterations):
+    def train(self, X, Y, num_epochs, mini_batch_size):
         self.set_train(True)
-        print_ind = max(num_iterations // 100, 1)
-        L = len(self.layers)
+        print_ind = max(num_epochs // 100, 1)
         costs = []
+        seed = 10
 
-        for i in range(num_iterations):
+        for i in range(num_epochs):
             Al = np.array(X, copy=True)
             Al = self.forward_propagation(Al)
             dAl = self.backward_propagation(Al, Y)
 
+            mini_batches = self.random_mini_batches(X, Y, mini_batch_size, seed)
+            seed += 1
+
+            for mini_batch in mini_batches:
+                Al = self.forward_propagation(mini_batch[0])
+                dAl = self.backward_propagation(Al, mini_batch[1])
+
             # record progress
-            if num_iterations == 1 or (i > 0 and i % print_ind == 0):
+            if num_epochs == 1 or (i > 0 and i % print_ind == 0):
                 J = self.compute_cost(Al, Y)
                 costs.append(J)
                 inject_string = ""
                 if self.inject_str_func is not None:
                     inject_string = self.inject_str_func(self, X, Y, Al)
-                print(f"cost after {i} full updates {100 * i / num_iterations}%:{J}" + inject_string)
+                print(f"cost after {i} full updates {100 * i / num_epochs}%:{J}" + inject_string)
+
+        self.set_train(False)
         return costs
+
+    def random_mini_batches(self, X, Y, mini_batch_size=64, seed=0):
+        np.random.seed(seed)
+
+        m = X.shape[1]
+
+        permutation = list(np.random.permutation(m))
+
+        shuffled_X = X[:, permutation]
+        shuffled_Y = Y[:, permutation].reshape((-1, m))
+        num_complete_minibatches = m // mini_batch_size
+
+        mini_batches = []
+
+        for k in range(num_complete_minibatches + 1):
+            mini_batch_X = shuffled_X[:, mini_batch_size * k: (k + 1) * mini_batch_size]
+            mini_batch_Y = shuffled_Y[:, mini_batch_size * k: (k + 1) * mini_batch_size]
+            mini_batch = (mini_batch_X, mini_batch_Y)
+            mini_batches.append(mini_batch)
+
+            if (k == num_complete_minibatches + 1) and ((m / mini_batch_size) != num_complete_minibatches):
+                mini_batch_X = shuffled_X[:, (k + 1) * mini_batch_size:]
+                mini_batch_Y = shuffled_Y[:, (k + 1) * mini_batch_size:]
+                mini_batch = (mini_batch_X, mini_batch_Y)
+                mini_batches.append(mini_batch)
+
+        return mini_batches
 
     def predict(self, X):
         Al = X
         L = len(self.layers)
         for i in range(1, L):
-            Al = self.layers[i].forward_propagation(Al)
+            Al = self.layers[i].forward_propagation(Al, True)
 
         if Al.shape[0] > 1:
             return np.where(Al == Al.max(axis=0), 1, 0)

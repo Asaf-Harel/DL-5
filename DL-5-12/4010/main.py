@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from unit10 import c2w1_utils as u10
+from unit10 import utils as u10
 import sklearn
 import sklearn.datasets
 import scipy.io
@@ -139,26 +139,19 @@ np.random.seed(2)
 train_X, train_Y, test_X, test_Y = u10.load_2D_dataset()
 
 model = DLModel()
-model.add(DLLayer("Layer 1", 64, (train_X.shape[0],), "relu", "He", 0.05))
-model.add(DLLayer("Layer 2", 32, (64,), "relu", "He", 0.05))
-model.add(DLLayer("Layer 3", 5, (32,), "relu", "He", 0.05))
+model.add(DLLayer("Layer 1", 64, (train_X.shape[0],), "relu", "He", 0.05, regularization="L2"))
+model.add(DLLayer("Layer 2", 32, (64,), "relu", "He", 0.05, regularization="L2"))
+model.add(DLLayer("Layer 3", 5, (32,), "relu", "He", 0.05, regularization="L2"))
 model.add(DLLayer("Output Layer", 1, (5,), "sigmoid", "He", 0.05))
 
 model.compile("cross entropy")
 
 costs = model.train(train_X, train_Y, 20000)
-#
-# pred_train = model.confusion_matrix(train_X, train_Y)
-# pred_test = model.confusion_matrix(test_X, test_Y)
-#
-# i = 4
-#
-# print("train accuracy:", str(pred_train[i][i] / np.sum(pred_train[:, i])))
-# print("test accuracy:", str(pred_test[i][i] / np.sum(pred_test[:, i])))
-#
-# plt.title(f"Model no regularization")
-# axes = plt.gca()
-# axes.set_xlim([-0.75, 0.40])
-# axes.set_ylim([-0.75, 0.65])
-# u10.plot_decision_boundary(model, train_X, train_Y)
-# u10.print_costs(costs, 20000)
+print("train accuracy:", np.mean((model.forward_propagation(train_X) > 0.7) == train_Y))
+print("test accuracy:", np.mean((model.forward_propagation(test_X) > 0.7) == test_Y))
+plt.title(f"Model no regularization")
+axes = plt.gca()
+axes.set_xlim([-0.75, 0.40])
+axes.set_ylim([-0.75, 0.65])
+u10.plot_decision_boundary(model, train_X, train_Y)
+u10.print_costs(costs, 20000)
