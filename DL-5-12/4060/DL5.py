@@ -206,6 +206,9 @@ class DLLayer:
         dZ = self.activation_backward(dA)
         m = self._A_prev.shape[1]
 
+        eps = np.exp(-10)
+        m = np.where(m == 0, eps, m)  # to avoid divide by zero
+
         self.dW = (1.0 / m) * np.dot(dZ, self._A_prev.T)
         self.dW = self.backward_l2(dZ)
         self.db = (1.0 / m) * np.sum(dZ, axis=1, keepdims=True)
@@ -294,10 +297,18 @@ class DLModel:
         return 2 * (AL - Y)
 
     def _cross_entropy(self, AL, Y):
+        eps = np.exp(-10)
+        AL = np.where(AL == 0, eps, AL)
+        AL = np.where(AL == 1, 1 - eps, AL)
+
         error = np.where(Y == 0, -np.log(1 - AL), -np.log(AL))
         return error
 
     def _cross_entropy_backward(self, AL, Y):
+        eps = np.exp(-10)
+        AL = np.where(AL == 0, eps, AL)
+        AL = np.where(AL == 1, 1 - eps, AL)
+
         dAL = np.where(Y == 0, 1 / (1 - AL), -1 / AL)
         return dAL
 
@@ -371,24 +382,25 @@ class DLModel:
 
         for i in range(num_epochs):
             Al = np.array(X, copy=True)
-            Al = self.forward_propagation(Al)
-            dAl = self.backward_propagation(Al, Y)
 
             mini_batches = self.random_mini_batches(X, Y, mini_batch_size, seed)
             seed += 1
 
             for mini_batch in mini_batches:
+                if len(mini_batch[0][0]) == 0:
+                    continue
+
                 Al = self.forward_propagation(mini_batch[0])
                 dAl = self.backward_propagation(Al, mini_batch[1])
 
-            # record progress
-            if num_epochs == 1 or (i > 0 and i % print_ind == 0):
-                J = self.compute_cost(Al, Y)
-                costs.append(J)
-                inject_string = ""
-                if self.inject_str_func is not None:
-                    inject_string = self.inject_str_func(self, X, Y, Al)
-                print(f"cost after {i} full updates {100 * i / num_epochs}%:{J}" + inject_string)
+                # record progress
+                if num_epochs == 1 or (i > 0 and i % print_ind == 0):
+                    J = self.compute_cost(Al, mini_batch[1])
+                    costs.append(J)
+                    inject_string = ""
+                    if self.inject_str_func is not None:
+                        inject_string = self.inject_str_func(self, X, Y, Al)
+                    print(f"cost after {i} full updates {100 * i / num_epochs}%:{J}" + inject_string)
 
         self.set_train(False)
         return costs
@@ -411,7 +423,6 @@ class DLModel:
             mini_batch_Y = shuffled_Y[:, mini_batch_size * k: (k + 1) * mini_batch_size]
             mini_batch = (mini_batch_X, mini_batch_Y)
             mini_batches.append(mini_batch)
-
             if (k == num_complete_minibatches + 1) and ((m / mini_batch_size) != num_complete_minibatches):
                 mini_batch_X = shuffled_X[:, (k + 1) * mini_batch_size:]
                 mini_batch_Y = shuffled_Y[:, (k + 1) * mini_batch_size:]

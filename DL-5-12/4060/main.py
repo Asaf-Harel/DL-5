@@ -33,14 +33,13 @@ print("mini batch sanity check: " + str(mini_batches[0][0][0][0:3]))
 # ---------------- 2 ----------------
 train_X, train_Y = u10.load_minibatch_dataset()
 plt.show()
-
 model = DLModel()
 model.add(DLLayer("l1", 64, (train_X.shape[0],), "relu", "He", 0.05))
 model.add(DLLayer("l2", 32, (64,), "relu", "He", 0.05))
 model.add(DLLayer("l3", 5, (32,), "relu", "He", 0.05))
 model.add(DLLayer("output", 1, (5,), "sigmoid", "He", 0.05))
 
-model.compile("cross entropy")
+model.compile("cross entropy", 0.5)
 
 
 def run_model(model, num_epocs, mini_batch_size):
@@ -53,6 +52,7 @@ def run_model(model, num_epocs, mini_batch_size):
     train_predict = model.forward_propagation(train_X) > 0.7
     accuracy = np.sum(train_predict == train_Y) / train_X.shape[1]
     print("accuracy:", str(accuracy))
+
     # plt.title("Model with no mini batches")
     axes = plt.gca()
     axes.set_xlim([-1.5, 2.5])
@@ -60,4 +60,4 @@ def run_model(model, num_epocs, mini_batch_size):
     u10.plot_decision_boundary(model, train_X, train_Y)
 
 
-run_model(model, 20000, train_X.shape[1])
+run_model(model, 4000, 64)
