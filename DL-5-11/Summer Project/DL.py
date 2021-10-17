@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import h5py
 from sklearn.metrics import confusion_matrix
+import time
 
 
 class DLLayer:
@@ -278,6 +279,8 @@ class DLModel:
         L = len(self.layers)
         costs = []
 
+        start_time = time.time()
+
         for i in range(num_iterations):
             # forward propagation
             Al = X
@@ -298,6 +301,9 @@ class DLModel:
                 J = self.compute_cost(Al, Y)
                 costs.append(J)
                 print("cost after ", str(i // print_ind), "%:", str(J))
+
+        print(f"Train time: {time.time() - start_time}")
+
         return costs
 
     def predict(self, X):
