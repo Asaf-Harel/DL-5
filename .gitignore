@@ -4,3 +4,4 @@ venv/
 "3110 פרספטרון.pptx"
 .idea/
 **/__pycache__/
+**/data/
