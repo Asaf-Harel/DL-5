@@ -1,34 +1,88 @@
-from PIL import Image
-import numpy as np
+import keras.utils.generic_utils
+import tensorflow as tf
+from tensorflow.keras import layers, models, losses
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import matplotlib.pyplot as plt
-
 import utils
 
-image = Image.open('data/trojans/YouAreAnIdiot.png')
+(x_train, y_train), (x_test, y_test) = utils.get_data()
 
-width, height = image.size
+x_train = tf.convert_to_tensor(x_train)
+x_test = tf.convert_to_tensor(x_test)
 
-image_arr = np.array(image)
+CLASS_NAMES = ['malware', 'normal']
 
-section = height // 3
+x_train = tf.pad(x_train, [[0, 0], [2, 2], [2, 2], [0, 0]]) / 255
+x_test = tf.pad(x_test, [[0, 0], [2, 2], [2, 2], [0, 0]]) / 255
 
-top = image_arr[:section]
-bottom = image_arr[section * 2:]
+x_val = x_train[-200:, :, :, :]
+y_val = y_train[-200:]
+x_train = x_train[:-200, :, :, :]
+y_train = y_train[:-200]
 
-top_center = image_arr[section:(section + (section // 2))]
-bottom_center = image_arr[(section + (section // 2)):section * 2]
+# --------------------------------- model ---------------------------------
+model = models.Sequential()
+model.add(layers.experimental.preprocessing.Resizing(224, 224, interpolation="bilinear", input_shape=x_train.shape[1:]))
+model.add(layers.Conv2D(96, 11, strides=4, padding='same'))
+model.add(layers.Lambda(tf.nn.local_response_normalization))
+model.add(layers.Activation('relu'))
+model.add(layers.MaxPooling2D(3, strides=2))
+model.add(layers.Conv2D(256, 5, strides=4, padding='same'))
+model.add(layers.Lambda(tf.nn.local_response_normalization))
+model.add(layers.Activation('relu'))
+model.add(layers.MaxPooling2D(3, strides=2))
+model.add(layers.Conv2D(384, 3, strides=4, padding='same'))
+model.add(layers.Activation('relu'))
+model.add(layers.Conv2D(384, 3, strides=4, padding='same'))
+model.add(layers.Activation('relu'))
+model.add(layers.Conv2D(256, 3, strides=4, padding='same'))
+model.add(layers.Activation('relu'))
+model.add(layers.Flatten())
+model.add(layers.Dense(4096, activation='relu'))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(4096, activation='relu'))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(10, activation='softmax'))
 
-print('top', top.shape)
-print('top center', top_center.shape)
-print('bottom center', bottom_center.shape)
-print('bottom', bottom.shape)
-print('total height', top.shape[0] + top_center.shape[0] + bottom_center.shape[0] + bottom.shape[0])
+print(print(model.summary()))
+model.compile(optimizer='adam', loss=losses.sparse_categorical_crossentropy, metrics=['accuracy'])
 
-top_rgb = utils.extract_rgb(top)
-top_rgb_hist = np.histogram(top_rgb, bins=256)
+history = model.fit(x_train, y_train, batch_size=64, epochs=40, validation_data=(x_val, y_val))
 
-print(top_rgb_hist[0].shape)
-utils.show_hist(top_rgb, 'top')
-# [print(x, end=' ') for x in top_rgb_hist[0]]
-# [print(x, end=' ') for x in top_rgb_hist[1]]
+# model.save('./weights/model.h5')
+# model.save_weights('./weights/weights.h5')
 
+fig, axs = plt.subplots(2, 1, figsize=(15, 15))
+axs[0].plot(history.history['loss'])
+axs[0].plot(history.history['val_loss'])
+axs[0].title.set_text('Training Loss vs Validation Loss')
+axs[0].set_xlabel('Epochs')
+axs[0].set_ylabel('Loss')
+axs[0].legend(['Train', 'Val'])
+axs[1].plot(history.history['accuracy'])
+axs[1].plot(history.history['val_accuracy'])
+axs[1].title.set_text('Training Accuracy vs Validation Accuracy')
+axs[1].set_xlabel('Epochs')
+axs[1].set_ylabel('Accuracy')
+axs[1].legend(['Train', 'Val'])
+plt.show()
+
+print(model.evaluate(x_test, y_test))
+
+y_pred = model.predict(x_test)
+
+T5_lables = ['Malware', 'Normal']
+
+ax = plt.subplot()
+
+cm = confusion_matrix(y_test, y_pred.argmax(axis=1))
+print(cm)
+sns.heatmap(cm, annot=True, fmt='g', ax=ax)
+
+# labels, title and ticks
+ax.set_title('Confusion Matrix')
+ax.xaxis.set_ticklabels(T5_lables)
+ax.yaxis.set_ticklabels(T5_lables)
+
+plt.show()
