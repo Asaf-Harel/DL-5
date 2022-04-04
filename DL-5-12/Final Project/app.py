@@ -4,10 +4,13 @@ from os import path
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QLabel, QPushButton
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtGui import QFont, QPixmap, QColor
+from waitingspinnerwidget import QtWaitingSpinner
 
-from PIL import Image
+import numpy as np
 from binvis.converter import convert_to_image
+import utils
+
 import string
 import random
 
@@ -15,9 +18,12 @@ import random
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.__model = utils.create_model('weights/weights-colab.h5')
         self.setWindowTitle("Antivirus")
         self.setFixedSize(1200, 720)
         self.initUI()
+
+        self.__classes = ['malware ❌', 'normal ✅']
 
         if os.name == 'posix':
             self.__home_path = path.expanduser('~')
@@ -66,6 +72,7 @@ class MainWindow(QMainWindow):
             os.path.join(self.__home_path, "Desktop")), filter=files_filter, initialFilter='Executables (*.exe)')
 
         malware_file_path = ''.join(random.choices(string.ascii_letters, k=16)) + ".png"
+
         self.malware_image = convert_to_image(256, file_path, malware_file_path)
 
         self.file_button.setGeometry(500, 120, 200, 30)
@@ -73,14 +80,19 @@ class MainWindow(QMainWindow):
         image_pixmap = QPixmap(malware_file_path)
         self.image_label.setPixmap(image_pixmap)
         self.image_label.resize(image_pixmap.width(), image_pixmap.height())
-
         os.remove(malware_file_path)
 
     def confirm_clicked(self):
+        image_array = np.array(self.malware_image.resize((220, 220)))
+        modified_image = utils.get_image(np.array([image_array]))
+        result = self.__model.predict(modified_image).argmax(axis=1)[0]
+        result_str = self.__classes[result]
+
         self.confrim_button.setEnabled(False)
         msg = QMessageBox()
+
         msg.setWindowTitle("Analyzer")
-        msg.setText("Analyzing...")
+        msg.setText(result_str)
         msg.exec_()
         self.confrim_button.setEnabled(True)
 

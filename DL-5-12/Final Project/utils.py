@@ -35,7 +35,6 @@ def get_data():
     for i in range(len(CLASS_NAMES)):
         classes[CLASS_NAMES[i]] = i
 
-    print(classes)
     X = []
     Y = []
     for class_name in CLASS_NAMES:
@@ -59,7 +58,7 @@ def get_data():
     return (X_train, Y_train), (X_test, Y_test)
 
 
-def create_model():
+def create_model(weights_path: str):
     model = models.Sequential()
     model.add(
         layers.experimental.preprocessing.Resizing(224, 224, interpolation="bilinear", input_shape=(224, 224, 3)))
@@ -84,8 +83,11 @@ def create_model():
     model.add(layers.Dropout(0.5))
     model.add(layers.Dense(10, activation='softmax'))
 
+    model.load_weights(weights_path)
+
     return model
 
 
-def modify(data):
-    return tf.pad(data, [[0, 0], [2, 2], [2, 2], [0, 0]]) / 255
+def get_image(X: np.ndarray):
+    return tf.pad(X, [[0, 0], [2, 2], [2, 2], [0, 0]]) / 255
+

@@ -4,7 +4,7 @@ from binvis.scurve.hilbert import Hilbert
 from binvis.scurve.color import ColorClass
 
 
-def convert_to_image(size, file_path, name):
+def convert_to_image(size, file_path, name='', save_file=True):
     with open(file_path, 'rb') as file:
         data = file.read()
 
@@ -28,6 +28,8 @@ def convert_to_image(size, file_path, name):
             )
 
     c_small = c.resize((150, 450))
-    c_small.save(name)
+
+    if save_file:
+        c_small.save(name)
 
     return c
