@@ -5,7 +5,6 @@ from os import path
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QLabel, QPushButton
 from PyQt5.QtGui import QFont, QPixmap, QColor
-from waitingspinnerwidget import QtWaitingSpinner
 
 import numpy as np
 from binvis.converter import convert_to_image
@@ -18,7 +17,7 @@ import random
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.__model = utils.create_model('weights/weights-colab.h5')
+        self.__model = utils.create_model('weights/weights.h5')
         self.setWindowTitle("Antivirus")
         self.setFixedSize(1200, 720)
         self.initUI()

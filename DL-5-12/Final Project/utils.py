@@ -81,7 +81,7 @@ def create_model(weights_path: str):
     model.add(layers.Dropout(0.5))
     model.add(layers.Dense(4096, activation='relu'))
     model.add(layers.Dropout(0.5))
-    model.add(layers.Dense(10, activation='softmax'))
+    model.add(layers.Dense(2, activation='softmax'))
 
     model.load_weights(weights_path)
 
