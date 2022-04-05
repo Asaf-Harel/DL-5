@@ -1,4 +1,3 @@
-import keras.utils.generic_utils
 import tensorflow as tf
 from tensorflow.keras import layers, models, losses
 from sklearn.metrics import confusion_matrix
@@ -45,15 +44,15 @@ model.add(layers.Dense(4096, activation='relu'))
 model.add(layers.Dropout(0.5))
 model.add(layers.Dense(4096, activation='relu'))
 model.add(layers.Dropout(0.5))
-model.add(layers.Dense(10, activation='softmax'))
+model.add(layers.Dense(2, activation='softmax'))
 
 print(print(model.summary()))
 model.compile(optimizer='adam', loss=losses.sparse_categorical_crossentropy, metrics=['accuracy'])
 
-history = model.fit(x_train, y_train, batch_size=64, epochs=40, validation_data=(x_val, y_val))
+history = model.fit(x_train, y_train, batch_size=64, epochs=50, validation_data=(x_val, y_val))
 
-# model.save('./weights/model.h5')
-# model.save_weights('./weights/weights.h5')
+model.save('./weights/model.h5')
+model.save_weights('./weights/weights.h5')
 
 fig, axs = plt.subplots(2, 1, figsize=(15, 15))
 axs[0].plot(history.history['loss'])
